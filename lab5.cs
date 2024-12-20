@@ -1,21 +1,21 @@
 using System;
 using System.Drawing;
-using System.Threading;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 
 abstract class Figure
 {
     protected int X { get; set; }
     protected int Y { get; set; }
-
     protected Figure(int x, int y)
     {
         X = x;
         Y = y;
     }
-
     public abstract void DrawBlack(Graphics g);
     public abstract void HideDrawingBackGround(Graphics g, Color backgroundColor);
-
     public void MoveRight(Graphics g, Color backgroundColor, int steps)
     {
         for (int i = 0; i < steps; i++)
@@ -31,17 +31,14 @@ abstract class Figure
 class Circle : Figure
 {
     private int Radius { get; set; }
-
     public Circle(int x, int y, int radius) : base(x, y)
     {
         Radius = radius;
     }
-
     public override void DrawBlack(Graphics g)
     {
         g.FillEllipse(Brushes.Black, X - Radius, Y - Radius, 2 * Radius, 2 * Radius);
     }
-
     public override void HideDrawingBackGround(Graphics g, Color backgroundColor)
     {
         g.FillEllipse(new SolidBrush(backgroundColor), X - Radius, Y - Radius, 2 * Radius, 2 * Radius);
@@ -109,27 +106,64 @@ class Program
         using (var form = new Form())
         {
             form.Text = "Figures Movement";
-            form.Size = new Size(800, 600);
+            form.Size = new Size(500, 500);
             form.BackColor = Color.White;
+            Random random = new Random();
+            int formWidth = form.ClientSize.Width;
+            int formHeight = form.ClientSize.Height;
 
-            form.Paint += (sender, e) =>
+            Circle circle = new Circle(random.Next(50, formWidth - 50), random.Next(50, formHeight - 50), 35);
+            Square square = new Square(random.Next(50, formWidth - 50), random.Next(50, formHeight - 50), 75);
+            Rhomb rhomb = new Rhomb(random.Next(50, formWidth - 50), random.Next(50, formHeight - 50), 75, 75);
+            Button moveCircleButton = new Button
             {
-                Graphics g = e.Graphics;
-                Circle circle = new Circle(100, 200, 50);
-                Square square = new Square(300, 200, 100);
-                Rhomb rhomb = new Rhomb(500, 200, 120, 80);
-
-                circle.DrawBlack(g);
-                square.DrawBlack(g);
-                rhomb.DrawBlack(g);
-
-                Thread.Sleep(1000);
-
-                circle.MoveRight(g, form.BackColor, 10);
-                square.MoveRight(g, form.BackColor, 10);
-                rhomb.MoveRight(g, form.BackColor, 10);
+                Text = "Move Circle",
+                Size = new Size(100, 30),
+                Location = new Point(40, 25)
             };
 
+            Button moveSquareButton = new Button
+            {
+                Text = "Move Square",
+                Size = new Size(100, 30),
+                Location = new Point(190, 25)
+            };
+
+            Button moveRhombButton = new Button
+            {
+                Text = "Move Rhomb",
+                Size = new Size(100, 30),
+                Location = new Point(340, 25)
+            };
+
+            form.Controls.Add(moveCircleButton);
+            form.Controls.Add(moveSquareButton);
+            form.Controls.Add(moveRhombButton);
+
+            moveCircleButton.Click += (sender, e) =>
+            {
+                using (Graphics g = form.CreateGraphics())
+                {
+                    circle.MoveRight(g, form.BackColor, 55);
+                }
+            };
+
+            moveSquareButton.Click += (sender, e) =>
+            {
+                using (Graphics g = form.CreateGraphics())
+                {
+                    square.MoveRight(g, form.BackColor, 55);
+                }
+            };
+
+            moveRhombButton.Click += (sender, e) =>
+            {
+                using (Graphics g = form.CreateGraphics())
+                {
+                    rhomb.MoveRight(g, form.BackColor, 55);
+                }
+            };
+            Application.EnableVisualStyles();
             Application.Run(form);
         }
     }
